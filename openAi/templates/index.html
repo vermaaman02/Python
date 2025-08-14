@@ -1,0 +1,788 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tara - Personal AI Assistant | Developed by Aman Verma</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #1a1a1a;
+            color: #ffffff;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .app-container {
+            display: flex;
+            height: 100vh;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 260px;
+            background: #202123;
+            border-right: 1px solid #2d2d30;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .sidebar-header {
+            padding: 18px 12px;
+            border-bottom: 1px solid #2d2d30;
+        }
+
+        .new-chat-btn {
+            background: transparent;
+            border: 1px solid #565869;
+            color: #ffffff;
+            padding: 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            width: 100%;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s;
+        }
+
+        .new-chat-btn:hover {
+            background: #2d2d30;
+        }
+
+        .chat-history {
+            flex: 1;
+            overflow-y: auto;
+            padding: 8px;
+        }
+
+        .chat-item {
+            padding: 12px;
+            margin: 2px 0;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            color: #c5c5d2;
+            transition: all 0.2s;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .chat-item:hover {
+            background: #2d2d30;
+        }
+
+        .chat-item.active {
+            background: #343541;
+            color: #ffffff;
+        }
+
+        .sidebar-footer {
+            padding: 12px;
+            border-top: 1px solid #2d2d30;
+            font-size: 12px;
+            color: #8e8ea0;
+        }
+
+        /* Main Chat Area */
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: #343541;
+        }
+
+        .chat-header {
+            padding: 12px 20px;
+            border-bottom: 1px solid #565869;
+            background: #444654;
+            display: flex;
+            justify-content: between;
+            align-items: center;
+        }
+
+        .model-info {
+            font-size: 14px;
+            color: #c5c5d2;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .status-indicator {
+            width: 8px;
+            height: 8px;
+            background: #10a37f;
+            border-radius: 50%;
+        }
+
+        .chat-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .welcome-screen {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            text-align: center;
+        }
+
+        .welcome-title {
+            font-size: 32px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            background: linear-gradient(90deg, #10a37f, #1a73e8);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .welcome-subtitle {
+            font-size: 16px;
+            color: #8e8ea0;
+            margin-bottom: 32px;
+            max-width: 600px;
+        }
+
+        .example-prompts {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 12px;
+            max-width: 800px;
+            width: 100%;
+        }
+
+        .example-prompt {
+            background: #444654;
+            border: 1px solid #565869;
+            border-radius: 8px;
+            padding: 16px;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: left;
+        }
+
+        .example-prompt:hover {
+            background: #565869;
+            border-color: #6e6e80;
+        }
+
+        .example-prompt h4 {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #ffffff;
+        }
+
+        .example-prompt p {
+            font-size: 12px;
+            color: #c5c5d2;
+            line-height: 1.4;
+        }
+
+        .message {
+            margin-bottom: 24px;
+            display: flex;
+            gap: 16px;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+            width: 100%;
+        }
+
+        .message.user {
+            flex-direction: row-reverse;
+        }
+
+        .avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 14px;
+            flex-shrink: 0;
+        }
+
+        .user .avatar {
+            background: #10a37f;
+            color: #ffffff;
+        }
+
+        .assistant .avatar {
+            background: #444654;
+            color: #ffffff;
+        }
+
+        .message-content {
+            flex: 1;
+            padding: 12px 16px;
+            border-radius: 12px;
+            line-height: 1.5;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        .user .message-content {
+            background: #2d2d30;
+            color: #ffffff;
+        }
+
+        .assistant .message-content {
+            background: #444654;
+            color: #c5c5d2;
+            border: 1px solid #565869;
+        }
+
+        .typing-indicator {
+            display: none;
+            align-items: center;
+            gap: 8px;
+            margin: 16px 0;
+            color: #8e8ea0;
+            font-size: 14px;
+        }
+
+        .typing-dots {
+            display: flex;
+            gap: 2px;
+        }
+
+        .typing-dot {
+            width: 4px;
+            height: 4px;
+            background: #8e8ea0;
+            border-radius: 50%;
+            animation: typing 1.4s infinite;
+        }
+
+        .typing-dot:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .typing-dot:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes typing {
+            0%, 60%, 100% {
+                opacity: 0.3;
+            }
+            30% {
+                opacity: 1;
+            }
+        }
+
+        /* Input Area */
+        .input-area {
+            padding: 20px;
+            border-top: 1px solid #565869;
+            background: #343541;
+        }
+
+        .input-container {
+            max-width: 800px;
+            margin: 0 auto;
+            position: relative;
+        }
+
+        .input-wrapper {
+            background: #40414f;
+            border: 1px solid #565869;
+            border-radius: 12px;
+            padding: 12px 52px 12px 16px;
+            display: flex;
+            align-items: center;
+            transition: all 0.2s;
+        }
+
+        .input-wrapper:focus-within {
+            border-color: #10a37f;
+            box-shadow: 0 0 0 2px rgba(16, 163, 127, 0.1);
+        }
+
+        #messageInput {
+            background: transparent;
+            border: none;
+            outline: none;
+            color: #ffffff;
+            font-size: 16px;
+            flex: 1;
+            min-height: 24px;
+            max-height: 200px;
+            resize: none;
+            line-height: 1.5;
+        }
+
+        #messageInput::placeholder {
+            color: #8e8ea0;
+        }
+
+        .send-button {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: #10a37f;
+            border: none;
+            border-radius: 6px;
+            width: 32px;
+            height: 32px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+
+        .send-button:hover {
+            background: #0d8a6d;
+        }
+
+        .send-button:disabled {
+            background: #565869;
+            cursor: not-allowed;
+        }
+
+        .clear-button {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: transparent;
+            border: none;
+            color: #8e8ea0;
+            cursor: pointer;
+            padding: 4px;
+            border-radius: 4px;
+            transition: all 0.2s;
+        }
+
+        .clear-button:hover {
+            background: #565869;
+            color: #ffffff;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .sidebar {
+                position: fixed;
+                left: -260px;
+                z-index: 1000;
+                transition: left 0.3s;
+            }
+
+            .sidebar.open {
+                left: 0;
+            }
+
+            .main-content {
+                width: 100%;
+            }
+
+            .example-prompts {
+                grid-template-columns: 1fr;
+            }
+
+            .message {
+                padding: 0 12px;
+            }
+
+            .input-area {
+                padding: 12px;
+            }
+        }
+
+        /* Scrollbar Styling */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #2d2d30;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #565869;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #6e6e80;
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <button class="new-chat-btn" onclick="startNewChat()">
+                    <span>+</span> New Chat with Tara
+                </button>
+            </div>
+            
+            <div class="chat-history" id="chatHistory">
+                <!-- Chat history items will be added here -->
+            </div>
+            
+            <div class="sidebar-footer">
+                <div><strong>Tara v1.0</strong></div>
+                <div>Personal AI Assistant</div>
+                <div style="margin-top: 8px; font-size: 11px; color: #6e6e80;">
+                    Developed by<br><strong>Aman Verma</strong>
+                </div>
+                <div style="font-size: 10px; color: #565869; margin-top: 4px;">
+                    © 2025 All Rights Reserved
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <div class="chat-header">
+                <div class="model-info">
+                    <div class="status-indicator"></div>
+                    <span id="modelName">GPT-4o Mini</span>
+                    <span style="margin-left: 12px; color: #8e8ea0; font-size: 12px;">
+                        Personal AI by Aman Verma
+                    </span>
+                </div>
+            </div>
+
+            <div class="chat-container" id="chatContainer">
+                <!-- Welcome Screen -->
+                <div class="welcome-screen" id="welcomeScreen">
+                    <h1 class="welcome-title">Tara</h1>
+                    <p class="welcome-subtitle">
+                        Your Personal AI Assistant - Developed by <strong>Aman Verma</strong><br>
+                        Hi! I'm Tara, your intelligent female AI companion. I'm here to help you with 
+                        programming, AI development, and provide personalized assistance.
+                    </p>
+                    
+                    <div class="example-prompts">
+                        <div class="example-prompt" onclick="sendExamplePrompt('Help me debug my Python code')">
+                            <h4>🐛 Code Debugging</h4>
+                            <p>Help me debug my Python code and optimize it</p>
+                        </div>
+                        <div class="example-prompt" onclick="sendExamplePrompt('Explain how to deploy a Flask app to production')">
+                            <h4>🚀 Web Development</h4>
+                            <p>Guide me through Flask app deployment</p>
+                        </div>
+                        <div class="example-prompt" onclick="sendExamplePrompt('What are the latest AI and machine learning trends?')">
+                            <h4>🤖 AI Development</h4>
+                            <p>Discuss latest AI trends and technologies</p>
+                        </div>
+                        <div class="example-prompt" onclick="sendExamplePrompt('Review my code architecture and suggest improvements')">
+                            <h4>⚡ Code Review</h4>
+                            <p>Analyze and improve my project structure</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Messages will be added here -->
+                <div class="typing-indicator" id="typingIndicator">
+                    <div class="avatar">
+                        <span>T</span>
+                    </div>
+                    <div>
+                        Tara is thinking
+                        <div class="typing-dots">
+                            <div class="typing-dot"></div>
+                            <div class="typing-dot"></div>
+                            <div class="typing-dot"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="input-area">
+                <div class="input-container">
+                    <div class="input-wrapper">
+                        <button class="clear-button" onclick="clearChat()" title="Clear chat">
+                            🗑️
+                        </button>
+                        <textarea 
+                            id="messageInput" 
+                            placeholder="Message Tara - Your Personal AI Assistant..." 
+                            rows="1"
+                            onkeydown="handleKeyDown(event)"
+                            oninput="adjustTextareaHeight()"
+                        ></textarea>
+                        <button class="send-button" id="sendButton" onclick="sendMessage()" disabled>
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Personal Footer -->
+                <div style="text-align: center; padding: 16px; border-top: 1px solid #565869; margin-top: 8px; font-size: 11px; color: #8e8ea0;">
+                    <div style="margin-bottom: 4px;">
+                        <strong style="color: #10a37f;">Tara v1.0</strong> - Personal AI Assistant
+                    </div>
+                    <div style="margin-bottom: 4px;">
+                        Developed with ❤️ by <strong style="color: #ffffff;">Aman Verma</strong>
+                    </div>
+                    <div style="font-size: 10px; color: #6e6e80;">
+                        © 2025 Aman Verma. All Rights Reserved.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentConversationId = null;
+        let isTyping = false;
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            // Personal branding console message
+            console.log('%c� Tara - Personal AI Assistant', 'color: #10a37f; font-size: 18px; font-weight: bold;');
+            console.log('%c👨‍💻 Developed by Aman Verma', 'color: #ffffff; font-size: 14px;');
+            console.log('%c🚀 Version 1.0 | August 2025', 'color: #8e8ea0; font-size: 12px;');
+            console.log('%c⭐ Female AI Assistant Project', 'color: #1a73e8; font-size: 12px;');
+            console.log('');
+            
+            checkAPIStatus();
+            loadChatHistory();
+            
+            // Enable send button when user types
+            document.getElementById('messageInput').addEventListener('input', function() {
+                const sendButton = document.getElementById('sendButton');
+                sendButton.disabled = this.value.trim() === '';
+            });
+        });
+
+        function adjustTextareaHeight() {
+            const textarea = document.getElementById('messageInput');
+            textarea.style.height = 'auto';
+            textarea.style.height = Math.min(textarea.scrollHeight, 200) + 'px';
+        }
+
+        function handleKeyDown(event) {
+            if (event.key === 'Enter' && !event.shiftKey) {
+                event.preventDefault();
+                sendMessage();
+            }
+        }
+
+        function sendExamplePrompt(prompt) {
+            document.getElementById('messageInput').value = prompt;
+            document.getElementById('sendButton').disabled = false;
+            sendMessage();
+        }
+
+        async function sendMessage() {
+            const input = document.getElementById('messageInput');
+            const message = input.value.trim();
+            
+            if (!message || isTyping) return;
+
+            // Hide welcome screen
+            const welcomeScreen = document.getElementById('welcomeScreen');
+            if (welcomeScreen) {
+                welcomeScreen.style.display = 'none';
+            }
+
+            // Add user message
+            addMessage('user', message);
+            
+            // Clear input
+            input.value = '';
+            input.style.height = 'auto';
+            document.getElementById('sendButton').disabled = true;
+            
+            // Show typing indicator
+            showTyping();
+            
+            try {
+                const response = await fetch('/api/chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        message: message,
+                        conversation_id: currentConversationId
+                    })
+                });
+
+                const data = await response.json();
+                
+                if (data.success) {
+                    currentConversationId = data.conversation_id;
+                    addMessage('assistant', data.response);
+                    
+                    // Update chat history
+                    updateChatHistory(message);
+                } else {
+                    addMessage('assistant', `Error: ${data.error || 'Something went wrong'}`);
+                }
+            } catch (error) {
+                addMessage('assistant', `Connection error: ${error.message}`);
+            } finally {
+                hideTyping();
+            }
+        }
+
+        function addMessage(role, content) {
+            const chatContainer = document.getElementById('chatContainer');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${role}`;
+            
+            const avatar = document.createElement('div');
+            avatar.className = 'avatar';
+            avatar.textContent = role === 'user' ? 'A' : 'T';
+            
+            const messageContent = document.createElement('div');
+            messageContent.className = 'message-content';
+            messageContent.textContent = content;
+            
+            messageDiv.appendChild(avatar);
+            messageDiv.appendChild(messageContent);
+            
+            chatContainer.appendChild(messageDiv);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+
+        function showTyping() {
+            isTyping = true;
+            document.getElementById('typingIndicator').style.display = 'flex';
+            const chatContainer = document.getElementById('chatContainer');
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+
+        function hideTyping() {
+            isTyping = false;
+            document.getElementById('typingIndicator').style.display = 'none';
+        }
+
+        function startNewChat() {
+            currentConversationId = null;
+            const chatContainer = document.getElementById('chatContainer');
+            
+            // Remove all messages
+            const messages = chatContainer.querySelectorAll('.message');
+            messages.forEach(msg => msg.remove());
+            
+            // Show welcome screen
+            const welcomeScreen = document.getElementById('welcomeScreen');
+            if (welcomeScreen) {
+                welcomeScreen.style.display = 'flex';
+            }
+            
+            // Clear active chat history
+            document.querySelectorAll('.chat-item').forEach(item => {
+                item.classList.remove('active');
+            });
+        }
+
+        async function clearChat() {
+            if (currentConversationId) {
+                try {
+                    await fetch('/api/clear', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            conversation_id: currentConversationId
+                        })
+                    });
+                } catch (error) {
+                    console.error('Error clearing chat:', error);
+                }
+            }
+            
+            startNewChat();
+        }
+
+        function updateChatHistory(firstMessage) {
+            const chatHistory = document.getElementById('chatHistory');
+            const chatItem = document.createElement('div');
+            chatItem.className = 'chat-item active';
+            chatItem.textContent = firstMessage.slice(0, 30) + (firstMessage.length > 30 ? '...' : '');
+            chatItem.onclick = () => switchToChat(currentConversationId);
+            
+            // Remove active from other items
+            document.querySelectorAll('.chat-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            
+            chatHistory.insertBefore(chatItem, chatHistory.firstChild);
+        }
+
+        function switchToChat(conversationId) {
+            // This would switch to a specific conversation
+            // For now, we'll just highlight the selected item
+            document.querySelectorAll('.chat-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            event.target.classList.add('active');
+        }
+
+        function loadChatHistory() {
+            // This would load chat history from the server
+            // For now, we'll just show some example history
+            const chatHistory = document.getElementById('chatHistory');
+            
+            const examples = [
+                'Help with Python debugging',
+                'Flask app deployment guide',
+                'AI trends discussion',
+                'Algorithm optimization tips'
+            ];
+            
+            examples.forEach(example => {
+                const chatItem = document.createElement('div');
+                chatItem.className = 'chat-item';
+                chatItem.textContent = example;
+                chatItem.onclick = () => switchToChat('example');
+                chatHistory.appendChild(chatItem);
+            });
+        }
+
+        async function checkAPIStatus() {
+            try {
+                const response = await fetch('/api/status');
+                const data = await response.json();
+                
+                if (data.api_connected) {
+                    document.getElementById('modelName').textContent = data.model;
+                } else {
+                    document.getElementById('modelName').textContent = 'API Error';
+                    document.querySelector('.status-indicator').style.background = '#dc3545';
+                }
+            } catch (error) {
+                console.error('Error checking API status:', error);
+                document.querySelector('.status-indicator').style.background = '#dc3545';
+            }
+        }
+
+        // Mobile menu toggle (if needed)
+        function toggleSidebar() {
+            document.querySelector('.sidebar').classList.toggle('open');
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,18 @@
+services:
+  - type: web
+    name: tara-ai-assistant
+    env: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app:app
+    envVars:
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: AI_NAME
+        value: Tara
+      - key: AI_GENDER
+        value: Female
+      - key: DEVELOPER_NAME
+        value: Aman Verma
+      - key: FLASK_ENV
+        value: production
