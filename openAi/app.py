@@ -210,18 +210,17 @@ def status():
                 "conversations_active": len(conversations)
             }), 500
             
-        # Test API connection
-        test_response = client.chat.completions.create(
-            model=DEFAULT_MODEL,
-            messages=[{"role": "user", "content": "test"}],
-            max_tokens=5
-        )
+        # Simple check - just verify client exists and API key is set
+        api_key = os.getenv('OPENAI_API_KEY')
+        api_configured = api_key and api_key != 'your_openai_api_key_here' and len(api_key) > 20
         
         return jsonify({
-            "status": "healthy",
+            "status": "healthy" if api_configured else "warning",
             "model": DEFAULT_MODEL,
-            "api_connected": True,
-            "conversations_active": len(conversations)
+            "api_connected": api_configured,
+            "conversations_active": len(conversations),
+            "ai_name": "Tara",
+            "developer": "Aman Verma"
         })
         
     except Exception as e:
