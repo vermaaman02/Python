@@ -52,7 +52,7 @@
    - Click "Environment" tab
    - Add these variables:
      ```
-     OPENAI_API_KEY = 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
+     OPENAI_API_KEY = [YOUR_API_KEY_HERE]
      AI_NAME = Tara
      AI_GENDER = Female
      DEVELOPER_NAME = Aman Verma
