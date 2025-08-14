@@ -16,8 +16,15 @@ app.secret_key = os.getenv('SECRET_KEY', 'your-secret-key-change-this')
 # Enable CORS for all routes
 CORS(app, origins=os.getenv('ALLOWED_ORIGINS', '*').split(','))
 
-# Initialize OpenAI client
-client = OpenAI(api_key=os.getenv('OPENAI_API_KEY'))
+# Initialize OpenAI client with error handling
+try:
+    api_key = os.getenv('OPENAI_API_KEY')
+    if not api_key or api_key == 'your_openai_api_key_here':
+        raise ValueError("OpenAI API key not properly configured")
+    client = OpenAI(api_key=api_key)
+except Exception as e:
+    print(f"Error initializing OpenAI client: {e}")
+    client = None
 
 # Configuration
 DEFAULT_MODEL = os.getenv('DEFAULT_MODEL', 'gpt-4o-mini')
@@ -83,6 +90,14 @@ Remember: You are Tara, a female AI assistant who is proud to be {self.owner_nam
     def get_response(self, message, conversation_id):
         """Get AI response with conversation memory"""
         try:
+            # Check if OpenAI client is available
+            if client is None:
+                return {
+                    "success": False,
+                    "error": "OpenAI API not properly configured",
+                    "response": "Sorry, the AI service is not available. Please check the API configuration."
+                }
+            
             # Get or create conversation history
             if conversation_id not in conversations:
                 conversations[conversation_id] = []
@@ -186,6 +201,15 @@ def clear_conversation():
 def status():
     """Check API status"""
     try:
+        if client is None:
+            return jsonify({
+                "status": "error",
+                "model": DEFAULT_MODEL,
+                "api_connected": False,
+                "error": "OpenAI API not configured",
+                "conversations_active": len(conversations)
+            }), 500
+            
         # Test API connection
         test_response = client.chat.completions.create(
             model=DEFAULT_MODEL,
@@ -206,6 +230,16 @@ def status():
             "api_connected": False,
             "error": str(e)
         }), 500
+
+@app.route('/health', methods=['GET'])
+def health_check():
+    """Simple health check for deployment"""
+    return jsonify({
+        "status": "healthy",
+        "service": "Tara AI Assistant",
+        "developer": "Aman Verma",
+        "version": "1.0"
+    })
 
 @app.route('/api/models', methods=['GET'])
 def get_models():
