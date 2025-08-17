@@ -472,9 +472,9 @@
                 <div class="welcome-screen" id="welcomeScreen">
                     <h1 class="welcome-title">Tara</h1>
                     <p class="welcome-subtitle">
-                        Your Personal AI Assistant - Developed by <strong>Aman Verma</strong><br>
-                        Hi! I'm Tara, your intelligent female AI companion. I'm here to help you with 
-                        programming, AI development, and provide personalized assistance.
+                        Your Personal AI Assistant - Created by <strong>Aman Verma</strong><br>
+                        Hi! I'm Tara, an intelligent female AI assistant created by Aman Verma. I'm here to help you with 
+                        programming, questions, research, and provide personalized assistance to anyone who uses this platform.
                     </p>
                     
                     <div class="example-prompts">
@@ -516,12 +516,14 @@
             <div class="input-area">
                 <div class="input-container">
                     <div class="input-wrapper">
-                        <button class="clear-button" onclick="clearChat()" title="Clear chat">
-                            🗑️
+                        <button class="clear-button" onclick="clearChat()" title="New chat">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm5 11h-4v4h-2v-4H7v-2h4V7h2v4h4v2z"/>
+                            </svg>
                         </button>
                         <textarea 
                             id="messageInput" 
-                            placeholder="Message Tara - Your Personal AI Assistant..." 
+                            placeholder="Message Tara - Ask me anything!" 
                             rows="1"
                             onkeydown="handleKeyDown(event)"
                             oninput="adjustTextareaHeight()"
